@@ -17,19 +17,21 @@ class ApiController extends AbstractController
     /**
      * @Route("/allbookings", name="app_api_all_bookings", methods={"GET"})
      */
-    public function allbookings(RoomRepository $roomRepository): Response
+    public function allbookings(Request $request): Response
     {
 
-        $data = $this->getBookings();
+        $start_dt = $request->query->get('start');
+        $end_dt = $request->query->get('end');
+        $data = $this->getBookings($start_dt, $end_dt);
 
-        $begin = new \DateTime('2022-03-01');
-        $end = new \DateTime('2022-03-31');
+        $begin = new \DateTime($start_dt);
+        $end = new \DateTime($end_dt);
         $end = $end->modify( '+1 day' );
 
         $interval = \DateInterval::createFromDateString('1 day');
         $period = new \DatePeriod($begin, $interval, $end);
 
-        $availabilityArray = $this->arrayLoop($period, $data);
+        $availabilityArray = $this->arrayLoop2($period, $data);
 
         
         return $this->json($availabilityArray);
@@ -73,7 +75,9 @@ class ApiController extends AbstractController
 
     }
 
-
+    /*
+     * Initial data iteration replaced by arrayLoop2   
+     */
     private function arrayLoop($period, $data) {
         $rooms = [];
         $availabilityArray = [];
